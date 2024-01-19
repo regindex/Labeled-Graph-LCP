@@ -68,10 +68,15 @@ std::vector<uint_t> compute_LCS(wg_t& wg)
     delete next_queue;
     delete curr_queue;
 
-    std::cout << "LCP =====\n";
+    // print the LCS
+    std::cout << "LCS =====\n";
     for(uint_t i=0;i<LCS.size();++i)
     {
-        std::cout << i << " : " << LCS[i] << "\n";
+        std::cout << i << " : ";
+        if( LCS[i] == U_MAX )
+            std::cout << "inf\n";
+        else
+         std::cout << LCS[i] << "\n";
     }
 
     return LCS;

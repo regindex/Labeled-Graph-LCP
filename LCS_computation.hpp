@@ -42,14 +42,14 @@ std::vector<uint_t> compute_LCS(wg_t& wg)
     // scan intervals for next l value
     while(queue.set_queue_for_next_l())
     {
-        std::cout << "=== l=" << queue.get_l() << "\n";
+        //// std::cout << "=== l=" << queue.get_l() << "\n";
         // scan all intervals associated to the
         // current LCP value
         while(not queue.empty())
         {
             // pop interval on the top of the queue
             interval curr_int = queue.pop_front(); 
-            std::cout << curr_int.first << " " << curr_int.second << std::endl;
+            //// std::cout << curr_int.first << " " << curr_int.second << std::endl;
 
             // we propagate an [l,r] interval only if we 
             // set a new LCS value in LCS[l] 

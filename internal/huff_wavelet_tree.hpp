@@ -92,7 +92,7 @@ public:
 		// alphabet size
 		uint_wt k = cs.size();
 		// initialize alphabet vector
-		std::vector<char_wt> cs_ = cs;
+		std::vector<char_wt> cs_(k);
 		// initialize rank vectors
 		std::vector<uint_wt> rank_i, rank_j;
 		rank_i.resize(k); rank_j.resize(k);

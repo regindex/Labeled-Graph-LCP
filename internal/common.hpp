@@ -16,6 +16,8 @@
 #include <cassert>
 #include <queue>
 
+#include <math.h>
+
 #include <sdsl/wavelet_trees.hpp>
 #include <sdsl/wt_algorithm.hpp>
 #include <sdsl/bit_vectors.hpp>

@@ -2,7 +2,7 @@
 #include <string>
 
 #include "internal/WG_string.hpp"
-#include "internal/LCS_computation.hpp"
+#include "LCS_computation.hpp"
 
 int main(int argc, char** argv)
 {

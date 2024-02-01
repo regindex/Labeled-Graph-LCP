@@ -25,6 +25,14 @@ public:
 	bit_vector(){}
 
 	/*
+	 * constructor that builds a bitvector given its size
+	 */
+	bit_vector(uint_t u_): u(u_){
+		// init u size bitvector 
+		bv = sdsl::bit_vector(u,0);
+	}
+
+	/*
 	 * constructor that builds a bitvector given an input file
 	 */
 	bit_vector(std::string filepath){
@@ -81,12 +89,36 @@ public:
 	    return *this;
 	}
 
+	void set_bit(uint_t i)  
+	{ 
+		// check index size
+		assert(i<u);
+		
+		bv[i] = 1;
+	}
+
+	void unset_bit(uint_t i)
+	{
+		// check index size  
+		assert(i<u);
+		
+		bv[i] = 0;
+	}
+
 	uint_t rank_0(uint_t i)
 	{
 		// check index size
 		assert(i<u);
 		
 		return rank0(i);
+	}
+
+	uint_t rank_1(uint_t i)
+	{
+		// check index size
+		assert(i<u+1);
+		
+		return rank1(i);
 	}
 
 	uint_t select_1(uint_t i)
@@ -100,6 +132,12 @@ public:
 		return select1(i);
 	}
 
+	void init_rank_1_support()
+	{
+		// compute rank 1 support ds
+		rank1 = sdsl::bit_vector::rank_1_type(&bv);
+	}
+
 private:
 
 	//bitvector length
@@ -107,6 +145,8 @@ private:
 	// bitvector + rank/select support
 	sdsl::bit_vector bv;
 	sdsl::bit_vector::rank_0_type rank0;
+	sdsl::bit_vector::rank_1_type rank1;
+	sdsl::bit_vector::select_0_type select0;
 	sdsl::bit_vector::select_1_type select1;
 };
 

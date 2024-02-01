@@ -61,7 +61,7 @@ public:
 		// initialize queue size
 		size = 0;
 		// initialize l value
-		l = U_MAX;
+		l = INF;
 		// we start with the classic queue type
 		Switch = false; Switch2 = false;
 		// no ones in bit vector

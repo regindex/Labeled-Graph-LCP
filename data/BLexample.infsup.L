@@ -1,1 +1,1 @@
-ttttccggggaaaaaattaa
+ttttcgcgggaaaaaattaa

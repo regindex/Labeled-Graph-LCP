@@ -22,7 +22,7 @@ void print_LCS(std::vector<uint_t>& LCS)
     for(uint_t i=0;i<LCS.size();++i)
     {
         std::cout << i << " : ";
-        if( LCS[i] == U_MAX )
+        if( LCS[i] == INF )
             std::cout << "inf\n";
         else
          std::cout << LCS[i] << "\n";
@@ -33,7 +33,7 @@ template<class wg_t>
 std::vector<uint_t> compute_LCS(wg_t& wg)
 {
     // initialize LCS vector
-    std::vector<uint_t> LCS(wg.get_no_nodes(),U_MAX);
+    std::vector<uint_t> LCS(wg.get_no_nodes(),INF);
     // initalize interval queue
     wg::hybrid_queue queue(wg.get_no_nodes());
     // fill next queue with first interval
@@ -42,18 +42,18 @@ std::vector<uint_t> compute_LCS(wg_t& wg)
     // scan intervals for next l value
     while(queue.set_queue_for_next_l())
     {
-        std::cout << "=== l=" << queue.get_l() << "\n";
+        //// std::cout << "=== l=" << queue.get_l() << "\n";
         // scan all intervals associated to the
         // current LCP value
         while(not queue.empty())
         {
             // pop interval on the top of the queue
             interval curr_int = queue.pop_front(); 
-            std::cout << curr_int.first << " " << curr_int.second << std::endl;
+            //// std::cout << curr_int.first << " " << curr_int.second << std::endl;
 
             // we propagate an [l,r] interval only if we 
             // set a new LCS value in LCS[l] 
-            if(LCS[curr_int.first] == U_MAX)
+            if(LCS[curr_int.first] == INF)
             { 
                 // set LCP entry
                 LCS[curr_int.first] = queue.get_l()-1;
@@ -63,7 +63,7 @@ std::vector<uint_t> compute_LCS(wg_t& wg)
                 // fill d+1 queue
                 for(uint_t i=0;i<intervals.first.size();++i)
                 {
-                    if(LCS[intervals.first[i]] != U_MAX)
+                    if(LCS[intervals.first[i]] != INF)
                         continue;
 
                     // push new interval in the queue

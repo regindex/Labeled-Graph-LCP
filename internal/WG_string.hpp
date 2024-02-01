@@ -40,11 +40,11 @@ private:
 	/* check for the number of source edges */
 	uint_t check_source(std::string filepath)
 	{
-		uint_t no_sources = 0; bool_t bit = 1;
+		uint_t no_sources = 0; uint_t bit = 49;
 		// open stream
 		std::ifstream bitstring(filepath);
 		// check first bites
-		while( bit ){
+		while( bit == 49 ){
 			// read bit
 			bitstring.read(reinterpret_cast<char*>(&bit), sizeof(bool_t));
 			// increase no sources

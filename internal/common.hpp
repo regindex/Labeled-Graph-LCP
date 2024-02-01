@@ -21,6 +21,8 @@
 #include <sdsl/wavelet_trees.hpp>
 #include <sdsl/wt_algorithm.hpp>
 #include <sdsl/bit_vectors.hpp>
+#include <sdsl/rmq_support.hpp>
+#include <sdsl/int_vector.hpp>
 #include <sdsl/util.hpp>
 
 #ifndef M64
@@ -31,12 +33,12 @@
     typedef uint64_t uint_t;
     typedef uint8_t char_t;
     typedef bool bool_t;
-    #define U_MAX UINT64_MAX
+    #define INF UINT64_MAX
 #else
     typedef uint32_t uint_t;
     typedef uint8_t char_t;
     typedef bool bool_t;
-    #define U_MAX UINT32_MAX
+    #define INF UINT32_MAX
 #endif
 
 typedef sdsl::wt_huff<>::value_type char_wt;

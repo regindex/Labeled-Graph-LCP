@@ -50,6 +50,22 @@ private:
 			// increase no sources
 			no_sources++;
 		}
+		// check if every state has exactly one incoming edge
+		for(uint_t i=0;i<(L.size()-no_sources);++i)
+		{
+			bool_t flag = false;
+			if( bit == 49 ){ flag = true; }
+			// read bit
+			bitstring.read(reinterpret_cast<char*>(&bit), sizeof(bool_t));
+			if( bit == 48 ){ flag = true; }
+			// read bit
+			bitstring.read(reinterpret_cast<char*>(&bit), sizeof(bool_t));
+			// check flag
+			if( flag ){
+				std::cerr << "Error! all nodes must have exactly one incoming edge." 
+				                                                       << std::endl;
+				exit(1); }
+		}
 		// close stream
 		bitstring.close();
 		
@@ -63,7 +79,7 @@ public:
 	* Constructor that takes in input the basepath of the input files and construct
 	* an FM-index for the (pruned) Wheeler automaton with support to forward search.
 	*/
-	wg_fm_index(std::string basepath){
+	wg_fm_index(std::string basepath): path(basepath){
 		// construct the wavalet tree for the outgoinf labels
 		L = wt_t(basepath+".L");
 		// construct the bitvector encoding the out degrees
@@ -90,6 +106,12 @@ public:
 	uint_t get_sigma()
 	{
 		return L.alphabet_size();
+	}
+
+	/*  */
+	std::string get_path()
+	{
+		return path;
 	}
 
 	/* compute forward search step in the interval [i,j] */
@@ -119,6 +141,8 @@ private:
 	bit_vec_t out;
 	// number of source states
 	uint_t has_source_incoming_edge;
+	// input file path
+	std::string path;
 };
 
 }

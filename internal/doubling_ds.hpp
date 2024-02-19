@@ -15,6 +15,7 @@
 
 // include rmq data structure
 #include "static_rmq.hpp"
+#include "check_output.hpp"
 
 namespace ds{
 
@@ -70,7 +71,7 @@ private:
 	void init_bucket_ids()
 	{
 		// set first bit
-		I.set_bit(0);
+		I.set_bit(0); sigma = 0;
 		// set sources bit
 		uint_t sum = sources; I.set_bit(sum);
 		// iterate over char freq
@@ -82,7 +83,7 @@ private:
 				// set a new bit
 				I.set_bit(sum);
 				// update bit in the LCP
-				H.update(sum,0);
+				H.update(sum,0); sigma++;
 				// position of the next bit
 				sum += freq[i];
 				// save sum in freq vector
@@ -106,11 +107,15 @@ private:
 		std::ifstream Lstring(filepath2);
 		// init variables
 		char_t bit = '0', c; uint_t run = 0, id = 0;
+		// set first entries
+		for(uint_t i=0;i<sources;++i)
+			M[i] = INF;
 		// iterate over .out file
 		for(uint_t i=0;i<(2*n)-sources;++i)
 		{
 			// read bit
 			bitstring.read(reinterpret_cast<char*>(&bit), sizeof(char_t));
+			//std::cout << bit << "";
 			// extend a run of zeroes otherwise insert a new predecessor
 			if(bit == '0')
 				run++;
@@ -119,6 +124,7 @@ private:
 				for(uint_t j=0;j<run;++j)
 				{
 					Lstring.read(reinterpret_cast<char*>(&c), sizeof(char_t));
+					//std::cout << c << "\n";
 					// set a new entry in M vector
 					M[freq[c]++] = id;
 				}
@@ -126,6 +132,9 @@ private:
 				run = 0; id++;
 			}
 		}
+		//std::cout << "\n";
+		//for(uint_t j=0;j<n;++j)
+			//std::cout << M[j] << " ";
 		// close streams
 		bitstring.close(); Lstring.close();
 	}
@@ -134,6 +143,7 @@ private:
 	void update_predecessor_vector()
 	{
 		// initialize a temp vector
+		//std::vector<uint_t> temp(n,INF);
 		std::vector<uint_t> temp(n,INF);
 		// iterate over all M positions
 		for(uint_t i=sources;i<n;++i)
@@ -148,8 +158,13 @@ private:
 					M[i] = M[M[i]];
 				else
 					M[i] = temp[M[i]];
+				//
+				// if( M[i] == i ){ std::cout << "capita\n"; M[i] = INF; }
 			}
 		}
+		//for(uint_t j=0;j<n;++j)
+		//	std::cout << M[j] << " ";
+		//exit(1);
 		// clear temp vector
 		temp.clear();
 	}
@@ -165,7 +180,8 @@ private:
 			// set ith new bit in bucket bitvector if both
 			// LCS[i] is nonempty and LCS[i] was filled in 
 			// the previous round
-			if( (H.get(i) != INF) and (H.get(i) >= h_) )
+			//if( (H.get(i) != INF) and (H.get(i) >= h_) )
+			if( (H.get(i) < EMPTY) and (H.get(i) >= h_) )
 				I.set_bit(i);
 		}
 		// init rank 1 support for the mutated bitvector
@@ -180,7 +196,7 @@ public:
 	* Constructor that takes in input the basepath of the input files and construct
 	* the doubling data structure for running prefix doubling algorithm.
 	*/
-	doubling_ds(std::string basepath){
+	doubling_ds(std::string basepath): path(basepath){
 		// compute character frequencies
 		compute_character_frequencies(basepath+".L",n,freq);
 		// compute number of sources
@@ -202,7 +218,7 @@ public:
 	{
 		// double prefix length
 		h *= 2;
-		if( h >= n )
+		if( h > (n-sources) ) 
 			return false;
 		// update predecessor vector
 		update_predecessor_vector();
@@ -233,6 +249,20 @@ public:
 	{
 		// return iterator for the first LCS position
 		return h;
+	}
+
+	/* get no. nodes */
+	uint_t get_no_nodes()
+	{
+		// rewrite
+		return n;
+	}
+
+	/* get no. nodes */
+	uint_t get_sigma()
+	{
+		// rewrite
+		return sigma;
 	}
 
 	/* get predecessor of a certain node */
@@ -277,11 +307,21 @@ public:
 		}
 	}
 
+	/* */
+	void check_output()
+	{
+		// std::cout << path;
+		// 
+		check_LCS_correctness<sdsl::int_vector<>>(path,n,H.get_lcs_vector());
+	}
+
 private:
 	// number of nodes
 	uint_t n;
 	// number of sources
 	uint_t sources;
+	// alphabet size
+	uint_t sigma;
 	// mutable LCS and RMQ data structure
 	rmq_t H;
 	// bitvector encoding bucket indexes
@@ -290,6 +330,8 @@ private:
 	std::vector<uint_t> M;
 	// prefix length
 	uint_t h;
+	// input file path
+	std::string path;
 };
 
 }

@@ -6,7 +6,7 @@
 # Add the basic compiler options
 add_compile_options("-std=c++14")
 # Add release and debug options
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -ggdb3 -O3 -fsanitize=address -g") # Activate with "cmake -DCMAKE_BUILD_TYPE=DEBUG .." 
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -ggdb3 -fsanitize=address -g") # Activate with "cmake -DCMAKE_BUILD_TYPE=DEBUG .." 
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -ansi -march=native -funroll-loops -O3 -DNDEBUG") # Activate with "cmake -DCMAKE_BUILD_TYPE=RELEASE .." 
 
 ### MORE OPTIONS ###

@@ -97,6 +97,12 @@ public:
 		std::vector<uint_wt> rank_i, rank_j;
 		rank_i.resize(k); rank_j.resize(k);
 		// search character frequencies in the wavelet tree
+		if(i > j){
+			std::cout << "i > j " << i << " " << j << std::endl;
+		}
+		else if( j > wt.size() ){
+			std::cout << "j > wt.size()" << std::endl; exit(1);
+		}
 		sdsl::interval_symbols(wt,i,j,k,cs_,rank_i,rank_j);
 
 		if( k != cs_.size() )

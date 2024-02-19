@@ -14,6 +14,7 @@
 #include "internal/common.hpp"
 #include "internal/WG_string.hpp"
 #include "internal/hybrid_queue.hpp"
+#include "internal/check_output.hpp"
 
 void print_LCS(std::vector<uint_t>& LCS)
 {
@@ -30,7 +31,7 @@ void print_LCS(std::vector<uint_t>& LCS)
 }
 
 template<class wg_t>
-std::vector<uint_t> compute_LCS(wg_t& wg)
+std::vector<uint_t> compute_LCS(wg_t& wg,bool check_output,bool printLCS, bool verb)
 {
     // initialize LCS vector
     std::vector<uint_t> LCS(wg.get_no_nodes(),INF);
@@ -42,14 +43,15 @@ std::vector<uint_t> compute_LCS(wg_t& wg)
     // scan intervals for next l value
     while(queue.set_queue_for_next_l())
     {
-        //// std::cout << "=== l=" << queue.get_l() << "\n";
+        if(verb) std::cout << "======== filling LCS values=" << queue.get_l() << 
+            " - size of the queue= " << queue.get_size() << std::endl;
         // scan all intervals associated to the
         // current LCP value
         while(not queue.empty())
         {
             // pop interval on the top of the queue
             interval curr_int = queue.pop_front(); 
-            //// std::cout << curr_int.first << " " << curr_int.second << std::endl;
+            //std::cout << curr_int.first << " " << curr_int.second << std::endl;
 
             // we propagate an [l,r] interval only if we 
             // set a new LCS value in LCS[l] 
@@ -65,6 +67,7 @@ std::vector<uint_t> compute_LCS(wg_t& wg)
                 {
                     if(LCS[intervals.first[i]] != INF)
                         continue;
+                    //std::cout << "--> " << intervals.first[i] << " " << intervals.second[i] << "\n";
 
                     // push new interval in the queue
                     queue.push(intervals.first[i],intervals.second[i]);
@@ -74,9 +77,12 @@ std::vector<uint_t> compute_LCS(wg_t& wg)
     } // end while
     // fix first LCP entry
     LCS[0] = 0;
-
+    // check output
+    if( check_output )
+        check_LCS_correctness<std::vector<uint_t>>(wg.get_path(),wg.get_no_nodes(),&LCS);
     //print LCS
-    print_LCS(LCS);
+    if( printLCS )
+        print_LCS(LCS);
 
     return LCS;
 }

@@ -10,6 +10,13 @@ if(arg == "install"):
 	subprocess.call("mkdir install_dir".split())
 	subprocess.call("./install.sh install_dir".split())
 	os.chdir("../../")
+	print("###### Installing finite-automata-partition-refinement...")
+	os.chdir("external/finite-automata-partition-refinement")
+	subprocess.call("mkdir build".split())
+	os.chdir("build")
+	subprocess.call("cmake ..".split())
+	subprocess.call("make".split())
+	os.chdir("../../../")
 	print("###### Installing Wheeler-Automaton-LCS...")
 	subprocess.call("mkdir build".split())
 	os.chdir("build")
@@ -18,6 +25,8 @@ if(arg == "install"):
 if(arg == "clean"):
 	print("###### Cleaning sdsl-lite install...")
 	subprocess.call("rm -r external/sdsl-lite/install_dir".split())
+	print("###### Cleaning finite-automata-partition-refinement install...")
+	subprocess.call("rm -r external/finite-automata-partition-refinement/build".split())
 	print("###### Cleaning Wheeler-Automaton-LCS install...")
 	subprocess.call("rm -r build".split())
 if(arg == "update"):

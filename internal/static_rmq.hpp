@@ -36,7 +36,7 @@ public:
 	 */
 	static_rmq(uint_t n_): n(n_){
 		// initialize the LCS array
-		lcs = new sdsl::int_vector<>(n,INF);
+		lcs = new sdsl::int_vector<>(n,EMPTY);
 		// init rmq pointer to null
 		rmq = nullptr;
 	}
@@ -94,6 +94,12 @@ public:
 		assert(i<n);
 		// update LCS entry
 		(*lcs)[i] = val;
+	}
+
+	/* */
+	sdsl::int_vector<>* get_lcs_vector()
+	{
+		return lcs;
 	}
 
 private:

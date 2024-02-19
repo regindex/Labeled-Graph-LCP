@@ -23,8 +23,8 @@ private:
 	void init_next_bitvec_queue()
 	{
 		// (re-)init bitvectors for the queue intervals associated to the next LCS value 
-		if( Bn == nullptr ){ Bn = new sdsl_bvec(bit_size,0); En = new sdsl_bvec(bit_size,0); }
-		else{ Bn->bit_resize(0); Bn->bit_resize(bit_size); }
+		if( Bn == nullptr ){ Bn = new sdsl_bvec(bit_size_pad,0); En = new sdsl_bvec(bit_size_pad,0); }
+		else{ for(uint_t i=0;i<bit_size;++i){ (*Bn)[i] = 0; (*En)[i] = 0; } /*Bn->bit_resize(0); Bn->bit_resize(bit_size);*/ }
 	}
 
 	/* swap pointers for the bitvector queue */
@@ -70,6 +70,8 @@ public:
 		trigger = n/(2*log(n));
 		// set pointers to null
 		B = E = Bn = En = nullptr; 
+		// set 64 bits padded length
+		bit_size_pad = ((bit_size/64)+1)*64 + 1;
 	}
 
 	/* push new interval in the queue */
@@ -78,6 +80,7 @@ public:
 		// push to the bitvector-based queue
 		if( Switch2 )
 		{
+			//std::cout << "pusha: " << i << " - " << j << std::endl;
 			assert(i < bit_size and j < bit_size);
 			// set the two interval bits
 			(*Bn)[i] = 1; (*En)[j] = 1;
@@ -99,6 +102,7 @@ public:
 		Switch = Switch2;
 		// setup queue type
 		if( Switch ){
+			//std::cout << "SET BITVEC QUEUE\n";
 			// set bitvector queue
 			size = bit_set;
 			swap_bitvec_queue();
@@ -111,16 +115,18 @@ public:
 			delete_curr_bitvec_queue();
 		}
 
-		// if queue is emtpy return false
+		// if queue is empty return false
 		if( size == 0 ){ /*clear();*/ return false; }
 
 		// set next switch
 		if( size > trigger ){
+			//std::cout << "SET NEXT BITVEC QUEUE\n";
 			// set switch on and init bitvectors	
 			Switch2 = true;
 			init_next_bitvec_queue();
 		}
 		else{
+			//std::cout << "DELETE NEXT BITVEC QUEUE\n";
 			// set switch on and delete bitvectors
 			Switch2 = false;
 			// delete old bitvector queue
@@ -133,6 +139,38 @@ public:
 
 	/* get queue front and pop it */
 	interval pop_front()
+	{
+		// pop from a bitvector based queue
+		if( Switch )
+		{
+			// scan the bitvector and check if the substrings B[B_i..B_i+64]
+			// and E[E_i..E_i+64] contain some ones
+			uint64_t b_i = 0, e_i = 0;
+			while( (b_i = B->get_int(B_i)) == 0 ){ B_i += 64; }
+			while( (e_i = E->get_int(E_i)) == 0 ){ E_i += 64; }
+
+			// get leftmost bits for both bitvectors
+			b_i = B_i + __builtin_ctzl(b_i);
+			e_i = E_i + __builtin_ctzl(e_i);
+			size--;
+
+			// set the two leftmost bits to zero
+			(*B)[b_i] = 0; (*E)[e_i] = 0;
+
+			return std::make_pair(b_i,e_i);
+		}
+		// pop from STL queue
+		else
+		{
+			interval res = queue_pair.front();
+			queue_pair.pop();
+			size--;
+			return res;
+		}
+	}
+
+	/* get queue front and pop it */
+	interval pop_front_old()
 	{
 		// pop from a bitvector based queue
 		if( Switch )
@@ -184,6 +222,7 @@ private:
 	sdsl_bvec* Bn; sdsl_bvec* En;
 	// bit vectors size
 	uint_t bit_size;
+	uint_t bit_size_pad;
 	// not bits set
 	uint_t bit_set;
 	// bitvector front indexes

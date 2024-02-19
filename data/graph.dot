@@ -1,0 +1,24 @@
+strict digraph {
+	S1;
+	S2 -> S3 [ label = 65 ];
+	S3 -> S4 [ label = 84 ];
+	S4 -> S5 [ label = 65 ];
+	S5 -> S2 [ label = 84 ];
+	S6 -> S6 [ label = 35 ];
+	S6 -> S7 [ label = 65 ];
+	S7 -> S8 [ label = 67 ];
+	S8 -> S9 [ label = 84 ];
+	S9 -> S10 [ label = 65 ];
+	S10 -> S7 [ label = 67 ];
+	S11 -> S8 [ label = 65 ];
+	S11 -> S11 [ label = 35 ];
+	S12 -> S13 [ label = 67 ];
+	S12 -> S12 [ label = 35 ];
+	S13 -> S7 [ label = 84 ];
+	S13 -> S14 [ label = 67 ];
+	S14 -> S15 [ label = 84 ];
+	S14 -> S17 [ label = 84 ];
+	S15 -> S10 [ label = 65 ];
+	S15 -> S15 [ label = 84 ];
+	S15 -> S16 [ label = 65 ];
+}

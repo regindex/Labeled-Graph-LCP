@@ -31,7 +31,7 @@ python3 compile.py install
 you can clean the current install as follows:
 
 ```console
-python3 compile.py clean
+python3 make.py clean
 ```
 
 ### Input
@@ -52,13 +52,21 @@ a .in file encoding the in-degrees in unary,
 ### Usage
 
 ```console
-Usage: ./lcs_exe [options] [input]
+Usage: build/lcs_exe [options] [input]
 Tool to compute the longest common suffix vector (LCS) of a Wheeler graph.
 
 	-b, --Beller
 		Computes the LCS array with an extension of Beller et al. algorithm.
 	-d, --doubling
 		Computes the LCS array with an extension of Manber-Myers doubling algorithm.
+	-p, --preprocessing
+		Perform preprocessing step computing the infsup automaton.
+	-v, --verbose
+		Activate the verbose mode.
+	-c, --check-output
+		Check final LCS vector correctness (debug-only).
+	-l, --print-lcs
+		Print the final LCS vector (debug-only).
  ```
 
 ### Run on example data
@@ -66,11 +74,14 @@ Tool to compute the longest common suffix vector (LCS) of a Wheeler graph.
 ```console
 # insert the base path of the input files (data/SHexample.L,data/SHexample.out,data/SHexample.in)
 ./lcs_exe --doubling ../data/BLexample.infsup
+# compute the preprocessing of a .dot graph
+./lcs_exe --preprocessing ../data/graph.dot
 ```
 
 ### External resources
 
 * [sdsl-lite](https://github.com/simongog/sdsl-lite.git)
+* [finite-automata-partition-refinement](https://github.com/regindex/finite-automata-partition-refinement.git)
 
 ### Funding
 

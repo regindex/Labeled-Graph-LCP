@@ -15,6 +15,7 @@
 #include <vector>
 #include <cassert>
 #include <queue>
+#include <algorithm>
 
 #include <math.h>
 
@@ -34,11 +35,13 @@
     typedef uint8_t char_t;
     typedef bool bool_t;
     #define INF UINT64_MAX
+    #define EMPTY UINT64_MAX - 1
 #else
     typedef uint32_t uint_t;
     typedef uint8_t char_t;
     typedef bool bool_t;
     #define INF UINT32_MAX
+    #define EMPTY UINT32_MAX - 1
 #endif
 
 typedef sdsl::wt_huff<>::value_type char_wt;

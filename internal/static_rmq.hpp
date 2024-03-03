@@ -31,75 +31,75 @@ public:
 
 	/*
 	 *
-	 * constructor that initializes a LCS vector of size n
+	 * constructor that initializes a LCP vector of size n
 	 * and the pointer to RMQ data structure.
 	 */
 	static_rmq(uint_t n_): n(n_){
-		// initialize the LCS array
-		lcs = new sdsl::int_vector<>(n,EMPTY);
+		// initialize the LCP array
+		LCP = new int_vector(n,EMPTY);
 		// init rmq pointer to null
 		rmq = nullptr;
 	}
 
-	uint_t lcs_size(){ return n; }
+	uint_t LCP_size(){ return n; }
 
-	iterator begin() { /* return pointer to first entry in the lcs array */ return iterator(lcs,0); }
-	iterator end(){ /* return pointer to last entry in the lcs array */ return iterator(lcs,n); }
+	iterator begin() { /* return pointer to first entry in the LCP array */ return iterator(LCP,0); }
+	iterator end(){ /* return pointer to last entry in the LCP array */ return iterator(LCP,n); }
 
 	static_rmq & operator= (const static_rmq & other) {
 
 		n = other.n;
-		lcs = other.lcs;
+		LCP = other.LCP;
 		rmq = other.rmq;
 
 	    return *this;
 	}
 	
-	/* update RMQ ds according to the current LCS vector */
+	/* update RMQ ds according to the current LCP vector */
 	void update_rmq_support()
 	{
 		// delete old ds if pointer is not null
 		if(rmq != nullptr)
 			delete rmq;
 		// compute rmq data structures working
-		// on the current LCS state
-		rmq = new sdsl::rmq_succinct_sct<>(lcs);
+		// on the current LCP state
+		rmq = new sdsl::rmq_succinct_sct<>(LCP);
 	}
 
-	/* update RMQ ds according to the current LCS vector */
+	/* update RMQ ds according to the current LCP vector */
 	uint_t rm_query(uint_t i, uint_t j)
 	{
 		assert(j >= i);
 		assert(j <= n);
 
 		if(i == j)
-			return (*lcs)[i];
+			return (*LCP)[i];
 
 		// return result of rmq query
-		return (*lcs)[(*rmq)(i, j)];
+		return (*LCP)[(*rmq)(i, j)];
 	}
 
-	/* return ith LCS entry */
+	/* return ith LCP entry */
 	uint_t get(uint_t i)
 	{
 		assert(i<n);
 
-		// return LCS entry
-		return (*lcs)[i];
+		// return LCP entry
+		return (*LCP)[i];
 	}
 
-	/* update the ith LCS entry */
+	/* update the ith LCP entry */
 	void update(uint_t i, uint_t val)
 	{
 		assert(i<n);
-		// update LCS entry
-		(*lcs)[i] = val;
+		// update LCP entry
+		(*LCP)[i] = val;
 	}
 
-	/* */
-	sdsl::int_vector<>* get_lcs_vector()
+	/* return pointer to the LCP vector */
+	int_vector* get_LCP_vector()
 	{
-		return lcs;
+		return LCP;
 	}
 
 private:
@@ -107,17 +107,17 @@ private:
 	// vector length
 	uint_t n;
 	// LCP array
-	sdsl::int_vector<>* lcs;
+	int_vector* LCP;
 	// RMQ data structure
 	sdsl::rmq_succinct_sct<>* rmq;
 	
-	// iterator class for the LCS vector
+	// iterator class for the LCP vector
     class iterator
     {
     	public:
 
 	        iterator():                    v(nullptr), i(0) {}
-	        iterator(sdsl::int_vector<>* v, uint_t i): v(v),       i(i) {}
+	        iterator(int_vector* v, uint_t i): v(v),       i(i) {}
 
 	        uint_t       operator*()             {return (*v)[i];}
 	        const uint_t operator*()       const {return (*v)[i];}
@@ -131,9 +131,9 @@ private:
 	        uint_t pos() {return i;}
 
     	private:
-    		// pointer to lcs vector
-    		sdsl::int_vector<>* v;
-    		// position in lcs vector
+    		// pointer to LCP vector
+    		int_vector* v;
+    		// position in LCP vector
     		uint_t        i;
     };
     

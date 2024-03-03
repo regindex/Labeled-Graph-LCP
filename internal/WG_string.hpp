@@ -91,28 +91,13 @@ public:
 	}
 
 	/* get number of edges */
-	uint_t get_L_length()
-	{
-		return L.size();
-	}
-
+	uint_t get_L_length(){ return L.size(); }
 	/* get number of states */
-	uint_t get_no_nodes()
-	{
-		return L.size() + has_source_incoming_edge;
-	}
-
+	uint_t get_no_nodes(){ return L.size() + has_source_incoming_edge; }
 	/* get alphabet sigma */
-	uint_t get_sigma()
-	{
-		return L.alphabet_size();
-	}
-
-	/*  */
-	std::string get_path()
-	{
-		return path;
-	}
+	uint_t get_sigma(){ return L.alphabet_size(); }
+	/* get path of the input file */
+	std::string get_path(){ return path; }
 
 	/* compute forward search step in the interval [i,j] */
 	rank_pair forward_all(uint_t i, uint_t j)
@@ -131,6 +116,46 @@ public:
 
 		return res.second;
 	}
+
+	/* compute mapping between a position in the BWT and a node in the input */
+	uint_t pos_to_node(uint_t i){ return out.rank_0(out.select_1(i)); }
+
+	/* compute forward search step for position j */
+	uint_t forward(uint_t j, char_t c)
+	{
+		// Apply a LF step in L
+		//std::cout << "j: " << j << " " << L.rank() << std::endl; 
+		uint_t rank_res = L.rank(c,j);
+		////// std::cout << "rank res: " << rank_res << std::endl;
+		rank_res += C[c-1] + has_source_incoming_edge;
+		// std::cout << "rank res: " << rank_res << "\n";
+
+		return rank_res;
+	}
+
+	/* wrapper to select query on the wavelet tree */
+	uint_t select_wt(uint_t i, char_t c){ return L.select(i,c); }
+	/* wrapper to select query on the wavelet tree */
+	uint_t rank_wt  (uint_t i, char_t c){ return L.rank(i,c); }
+
+	/* compute number of occurrences of a certain character in the BWT */
+	uint_t char_occs_bwt(char_t c){ return L.char_freq(c); }
+
+
+	/* return the first occurrence for each character */
+	std::vector<std::pair<char_t,uint_t>> first_char_occs()
+	{ 
+		std::vector<std::pair<char_t,uint_t>> occs;
+		std::vector<char_t> distinct = L.alphabet_characters();
+		// iterate over distinct characters
+		for(uint_t i=0;i<distinct.size();++i)
+		{
+			// compute the first occurrence positions for all distinct characters
+			occs.push_back(std::make_pair(distinct[i],L.select(0,distinct[i])));
+		}
+
+		return occs;
+	} 
 
 private:
 	// wavelet tree

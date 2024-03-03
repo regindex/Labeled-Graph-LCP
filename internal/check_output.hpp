@@ -1,23 +1,21 @@
-// Copyright (c) 2023, REGINDEX.  All rights reserved.
+// Copyright (c) 2024, REGINDEX.  All rights reserved.
 // Use of this source code is governed
 // by a MIT license that can be found in the LICENSE file.
 
 /*
- *  check_output: // TO COMPLETE
+ *  check_output: Function to check the correctness of the resulting LCP vector
  */
 
 #ifndef CHECK_OUTPUT_HPP_
 #define CHECK_OUTPUT_HPP_
 
-// #include "bit_vector.hpp"
-// #include "huff_wavelet_tree.hpp"
 #include "common.hpp"
 
 //namespace wg{
 
 //template<class wt_t, class bit_vec_t>
-template<typename lcs_type>
-class check_LCS_correctness{
+template<typename LCP_type>
+class check_LCP_correctness{
 
 private:
 	/* parse an edge line */
@@ -33,12 +31,13 @@ private:
 	    } 
 	}
 
+	/* check if the input stream is pointing to an empty file */
 	bool is_empty_stream(std::ifstream& file)
 	{
 	    return file.peek() == std::ifstream::traits_type::eof();
 	}
 
-	/* */
+	/* parse a dot file */
 	void read_dot(std::string graph, std::vector<uint_t>& M,
 		                             std::vector<char_t>& L)
 	{
@@ -81,31 +80,29 @@ private:
 
 public:
 	// empty constructor
-	check_LCS_correctness(){}
+	check_LCP_correctness(){}
 	/*
-	* TO COMPLETE!
+	*  Constructor that takes in input an input graph and its LCP, and checks
+	*  if the LCP values are correct by explicitly visiting the graph.
 	*/
-	check_LCS_correctness(std::string filepath, uint_t n_, lcs_type* LCS_)
-														: n(n_), LCS(LCS_)
+	check_LCP_correctness(std::string filepath, uint_t n_, LCP_type* LCP_)
+														: n(n_), LCP(LCP_)
 	{
-		//
+		// initialize transitions list
 		transitions = std::vector<uint_t>(n,INF);
 		labels = std::vector<char_t>(n,0);
-		// read dot
+		// read dot graph
 		read_dot(filepath,transitions,labels);
 
 		for(uint_t i=1;i<n;++i)
 		{
-			//std::cout << "i: " << i << std::endl;
-			//
+			// initialize needed variables
 			std::string prefix = "";
-			//
 			uint_t curr = i, prev = i-1;
-			//
 			bool correct = true;
 			std::vector<bool> visited(n,0);
-			//
-			if((*LCS)[i] == INF)
+			// iterate over LCP array and check the incoming strings
+			if((*LCP)[i] == INF)
 			{
 				while(true)
 				{
@@ -117,10 +114,10 @@ public:
 					else
 					{
 						prefix.push_back(labels[curr]);
-						//
+						// stop if we reach the source or fall in a cycle
 						if( transitions[curr] == INF ){ break; }
 						if( visited[curr] && visited[prev] ){ break; }
-						//
+						//	set nodes to visited
 						visited[curr] = visited[prev] = true;
 						curr = transitions[curr]; prev = transitions[prev]; 
 					}
@@ -128,34 +125,29 @@ public:
 			}
 			else
 			{
-				for(uint_t j=0;j<(*LCS)[i];++j)
+				for(uint_t j=0;j<(*LCP)[i];++j)
 				{
-					//std::cout << "j: " << j << std::endl;
 					if( labels[curr] != labels[prev] )
 					{
 						correct = false;
 						break;
 					}
-					//
 					prefix.push_back(labels[curr]);
-					//
 					curr = transitions[curr]; prev = transitions[prev]; 
-					//exit(1);
 				}
-				//
+				// if the preceding labels is the same of current one
+				// the LCP values is not correct.
 				if( labels[curr] == labels[prev] )
 					correct = false;
 			}
 			//
 			if(correct == false)
 			{
-				std::cout << "LCS[" << i << "] uncorrect!\n";
+				std::cout << "LCP[" << i << "] not correct!\n";
 				exit(1);
 			}
-			//else
-			//	std::cout << prefix << std::endl;
 		}
-		std::cout << "The output is correct!\n";
+		std::cout << "The LCP vector is correct!\n";
 	}
 
 private:
@@ -165,9 +157,8 @@ private:
 	std::vector<uint_t> transitions;
 	// labels list
 	std::vector<char_t> labels;
-	// lcs vector pointer
-	lcs_type* LCS;
-	//sdsl::int_vector<>* LCS;
+	// LCP vector pointer
+	LCP_type* LCP;
 };
 
 //}

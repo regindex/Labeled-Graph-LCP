@@ -4,8 +4,8 @@
 
 /*
  *  doubling_ds: Implementation of the data structure containing all objects 
- *  		     needed to run the LCS prefix-doubling algorithm.
- *      modules: H: mutable LCS vector supporting RM queries.
+ *  		     needed to run the LCP prefix-doubling algorithm.
+ *      modules: H: mutable LCP vector supporting RM queries.
  *               I: bitvector encoding bucket ids.
  *               M: vector storing node predecessors.
  */
@@ -132,9 +132,6 @@ private:
 				run = 0; id++;
 			}
 		}
-		//std::cout << "\n";
-		//for(uint_t j=0;j<n;++j)
-			//std::cout << M[j] << " ";
 		// close streams
 		bitstring.close(); Lstring.close();
 	}
@@ -158,13 +155,8 @@ private:
 					M[i] = M[M[i]];
 				else
 					M[i] = temp[M[i]];
-				//
-				// if( M[i] == i ){ std::cout << "capita\n"; M[i] = INF; }
 			}
 		}
-		//for(uint_t j=0;j<n;++j)
-		//	std::cout << M[j] << " ";
-		//exit(1);
 		// clear temp vector
 		temp.clear();
 	}
@@ -174,11 +166,11 @@ private:
 	{
 		// old prefix length
 		uint_t h_ = h/2;
-		// iterate over the LCS vector
+		// iterate over the LCP vector
 		for(uint_t i=sources;i<n;++i)
 		{
 			// set ith new bit in bucket bitvector if both
-			// LCS[i] is nonempty and LCS[i] was filled in 
+			// LCP[i] is nonempty and LCP[i] was filled in 
 			// the previous round
 			//if( (H.get(i) != INF) and (H.get(i) >= h_) )
 			if( (H.get(i) < EMPTY) and (H.get(i) >= h_) )
@@ -192,9 +184,8 @@ public:
 	// empty constructor
 	doubling_ds(){}
 	/*
-	* REWRITE THIS DESCRIPTION!!!
 	* Constructor that takes in input the basepath of the input files and construct
-	* the doubling data structure for running prefix doubling algorithm.
+	* all data structures needed for running prefix doubling algorithm.
 	*/
 	doubling_ds(std::string basepath): path(basepath){
 		// compute character frequencies
@@ -230,24 +221,24 @@ public:
 		return true;
 	}
 
-	/* return iterator pointing first LCS vector position */
-	auto begin_lcs()
+	/* return iterator pointing first LCP vector position */
+	auto begin_LCP()
 	{
-		// return iterator for the first LCS position
+		// return iterator for the first LCP position
 		return H.begin();
 	}
 
-	/* return iterator pointing last LCS vector position */
-	auto end_lcs()
+	/* return iterator pointing last LCP vector position */
+	auto end_LCP()
 	{
-		// return iterator for the first LCS position
+		// return iterator for the first LCP position
 		return H.end();
 	}
 
 	/* get current prefix length */
 	uint_t get_h()
 	{
-		// return iterator for the first LCS position
+		// return iterator for the first LCP position
 		return h;
 	}
 
@@ -279,24 +270,23 @@ public:
 		return I.rank_1(i+1);
 	}
 
-	/* get rm query of LCS[i+1..j] */
+	/* get rm query of LCP[i+1..j] */
 	uint_t rmq(uint_t i, uint_t j)
 	{
 		// return rmq query between i and j
 		return H.rm_query(i+1,j);
 	}
 
-	/* update an LCS entry */
-	void update_lcs(uint_t i, uint_t val)
+	/* update an LCP entry */
+	void update_LCP(uint_t i, uint_t val)
 	{
-		//
 		H.update(i,val);
 	}
 
-	/* print the LCS vector */
-	void print_lcs()
+	/* print the LCP vector */
+	void print_LCP()
 	{
-		std::cout << "LCS ====" << std::endl;
+		std::cout << "LCP ====" << std::endl;
 		for(auto it = H.begin();it != H.end();++it)
 		{
 			std::cout << it.pos() << " : ";
@@ -307,12 +297,25 @@ public:
 		}
 	}
 
-	/* */
+	/* check LCP array correctness */
 	void check_output()
 	{
-		// std::cout << path;
-		// 
-		check_LCS_correctness<sdsl::int_vector<>>(path,n,H.get_lcs_vector());
+		check_LCP_correctness<int_vector>(path,n,H.get_LCP_vector());
+	}
+
+	/* print LCP to file */
+	void to_file_LCP(std::string ofile_path)
+	{
+		FILE * ofile = std::fopen(ofile_path.c_str(), "w");
+		int_vector* LCP = H.get_LCP_vector();
+		fwrite(LCP->data(), LCP->width()/8, LCP->size(), ofile);
+		fclose(ofile);
+	}
+
+	/* get input path */
+	std::string get_path()
+	{
+		return path;
 	}
 
 private:
@@ -322,7 +325,7 @@ private:
 	uint_t sources;
 	// alphabet size
 	uint_t sigma;
-	// mutable LCS and RMQ data structure
+	// mutable LCP and RMQ data structure
 	rmq_t H;
 	// bitvector encoding bucket indexes
 	bit_vec_t I;

@@ -1,4 +1,4 @@
-// Copyright (c) 2023, REGINDEX.  All rights reserved.
+// Copyright (c) 2024, REGINDEX.  All rights reserved.
 // Use of this source code is governed
 // by a MIT license that can be found in the LICENSE file.
 
@@ -27,10 +27,9 @@ public:
 		// compute huffman encoded wavelet tree
 		sdsl::construct(wt, filepath.c_str(), 1);
 		// compute distinct characters vector
-		cs.resize(128);
-		distinct_element_in_range(0,size(),this->cs,this->freq);
+		distinct_element_in_range(0,size(),this->cs,this->cs_to_freq,this->freq);
 		// check alphabet size
-		if( cs.size() < 1 ){
+		if( cs_to_freq.size() < 1 ){
 			std::cerr << "Error! The alphabet is empty, exiting...\n";
 			exit(1);
 		}
@@ -47,6 +46,7 @@ public:
 		wt = other.wt;
 		cs = other.cs;
 		freq = other.freq;
+		cs_to_freq = other.cs_to_freq;
 	    return *this;
 	}
 
@@ -70,19 +70,19 @@ public:
 	}
 
 	/* find all distinct element in the range [i,j] */
-	void distinct_element_in_range(uint_wt i, uint_wt j,
-		                           std::vector<char_wt>& cs, std::vector<uint_wt>& freq)
+	void distinct_element_in_range(uint_wt i, uint_wt j, std::vector<char_wt>& cs,
+		                           std::vector<char_wt>& cs_to_freq,std::vector<uint_wt>& freq)
 	{
 		// alphabet size - ASCII alphabet
 		uint_wt k = 128;
-		// initialize alphabet vector
-		cs.resize(k); std::iota(std::begin(cs), std::end(cs), 0);
-		// resize vector storing character frequencies
-		freq.resize(k);
+		// initialize alphabet and frequencies vector
+		cs.resize(k); freq.resize(k); std::iota(std::begin(cs), std::end(cs), 0);
 		// search character frequencies in the wavelet tree
 		sdsl::interval_symbols(wt,i,j,k,cs,freq,freq);
 		// keeps character with a positive frequency
 		cs.resize(k); freq.resize(k);
+		// compute characters mapping
+		cs_to_freq.resize(128); for(uint_t i=0;i<k;++i){cs_to_freq[cs[i]]=i;}
 	}
 
 	/* wrapper to interval_symbols function */
@@ -97,12 +97,14 @@ public:
 		std::vector<uint_wt> rank_i, rank_j;
 		rank_i.resize(k); rank_j.resize(k);
 		// search character frequencies in the wavelet tree
+		/*
 		if(i > j){
 			std::cout << "i > j " << i << " " << j << std::endl;
 		}
 		else if( j > wt.size() ){
 			std::cout << "j > wt.size()" << std::endl; exit(1);
 		}
+		*/
 		sdsl::interval_symbols(wt,i,j,k,cs_,rank_i,rank_j);
 
 		if( k != cs_.size() )
@@ -110,6 +112,23 @@ public:
 
 		return std::make_pair(cs_,std::make_pair(rank_i,rank_j));
 	}
+
+	/* wrapper to wavelet tree rank function */
+	uint_t rank(char_t c, uint_wt i)
+	{
+		assert(i <= wt.size());
+		return wt.rank(i,c);
+	}
+
+	/* wrapper to wavelet tree select function */
+	uint_t select(char_t c, uint_wt i)
+	{
+		assert(i <= wt.size());
+		return wt.select(i,c);
+	}
+
+	/* return distinct characters in the alphabet */
+	std::vector<char_wt> alphabet_characters(){ return cs; }
 
 	/* return alphabet size */
 	uint_t alph_size()
@@ -132,14 +151,30 @@ public:
 		return freq[i];
 	}
 
-private:
+	/* return frequency of a character */
+	uint_wt char_freq(uint_wt c)
+	{
+		assert(c<128);
+		return freq[cs_to_freq[c]];
+	}
 
+	/* return ith character in the wt */
+	uint_wt at(uint_t i)
+	{
+		assert(i < wt.size());
+		return wt[i];
+	}
+
+private:
 	// wavelet tree + rank/select support
 	sdsl::wt_huff<> wt;
 	// character frequencies
 	std::vector<uint_wt> freq;
 	// distinct characters
 	std::vector<char_wt> cs;
+	// mapping char to frequencies
+	std::vector<char_wt> cs_to_freq;
+
 };
 
 }

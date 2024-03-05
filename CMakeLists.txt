@@ -11,7 +11,7 @@ endif()
 message(STATUS "Install directory: ${CMAKE_INSTALL_PREFIX}")
 # About this project
 # ------------------------------------------------------------------------------
-project(Wheeler-Pseudoforest-LCP)
+project(Labeled-Graph-LCP)
 SET(VERSION_MAJOR "0")
 SET(VERSION_MINOR "1")
 SET(VERSION_PATCH "0")
@@ -53,5 +53,7 @@ include_directories(external/sdsl-lite/install_dir/include)
 
 LINK_DIRECTORIES(external/sdsl-lite/install_dir/lib)
 
-add_executable(computeLCP compute-LCP.cpp)
-target_link_libraries(computeLCP sdsl)
+add_executable(preprocessing main/step1-preprocessing.cpp)
+
+add_executable(compute-LCP main/step2-compute-LCP.cpp)
+target_link_libraries(compute-LCP sdsl)

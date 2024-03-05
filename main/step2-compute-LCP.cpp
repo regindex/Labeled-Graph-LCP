@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <chrono>
 
 #include "internal/WG_string.hpp"
 #include "internal/doubling_ds.hpp"
@@ -12,7 +13,7 @@ struct Args
 {
 	std::string input;
 	int algo = -1;
-	bool prep = false, check = false, print = false, verb = false;
+	bool check = false, print = false, verb = false;
 };
 
 // function that prints the instructions for using the tool
@@ -20,19 +21,19 @@ void print_help(char** argv) {
 	std::cout << std::endl <<
 		"Usage: " << argv[0] << " [options] [input]" << std::endl 
 
-		<< "Tool to compute the longest common prefix (LCP) vector of a Wheeler pseudoforest." << std::endl << std::endl
+		<< "Step 2: Compute the longest common prefix (LCP) vector of a Wheeler pseudoforest." << std::endl << std::endl
 
 	 	<< "	-b, --Beller-gen" << std::endl 
-		<< "		Computes the LCP array with a generalization of Beller et al. algorithm." << std::endl 
-
-	 	<< "	-d, --doubling" << std::endl 
-		<< "		Computes the LCP array with an extension of Manber-Myers doubling algorithm." << std::endl 
+		<< "		Computes the LCP array with a generalization of the Beller et al. algorithm." << std::endl 
 
 	 	<< "	-s, --interval-stabbing" << std::endl 
-		<< "		Computes the LCP array with an dynamic interval stabbing algorithm." << std::endl 
+		<< "		Computes the LCP array with a re-design of the Beller et al. algorithm relying on a dynamic interval stabbing data structure." << std::endl 
 
-	 	<< "	-p, --preprocessing" << std::endl 
-		<< "		Perform preprocessing step computing the Wheeler pseudoforest of an arbitrary labeled graph." << std::endl 
+	 	<< "	-d, --doubling-algo" << std::endl 
+		<< "		Computes the LCP array with an extension of the Manber-Myers doubling algorithm." << std::endl 
+
+	 	//<< "	-p, --preprocessing" << std::endl 
+		//<< "		Perform preprocessing step computing the Wheeler pseudoforest of an arbitrary labeled graph." << std::endl 
 
 	 	<< "	-v, --verbose" << std::endl 
 		<< "		Activate the verbose mode." << std::endl 
@@ -67,10 +68,10 @@ void parseArgs(int argc, char** argv, Args& arg) {
 		{
 			arg.algo = 2;
 		}
-		else if( param == "-p" or param == "--preprocessing" )
-		{
-			arg.prep = true;
-		}
+		//else if( param == "-p" or param == "--preprocessing" )
+		//{
+		//	arg.prep = true;
+		//}
 		else if( param == "-v" or param == "--verbose" )
 		{
 			arg.verb = true;
@@ -95,9 +96,9 @@ void parseArgs(int argc, char** argv, Args& arg) {
 		}
 	}
 	// check algo parameter
-	if( arg.algo == -1 and arg.prep == false )
+	if( arg.algo == -1 )
 	{
-		std::cerr << "Select a LCP construction algorithm or the preprocessing step! exiting..." << std::endl;
+		std::cerr << "Select a LCP construction algorithm! exiting..." << std::endl;
 		exit(1);
 	}
 }
@@ -108,14 +109,16 @@ int main(int argc, char** argv)
 	Args arg;
 	parseArgs(argc,argv,arg);
 
-	if(arg.prep)
+	/*if(arg.prep)
 	{
 		std::cout << "Running the preprocessing step on: " << arg.input << std::endl;
 		// compute infsup automaton
 		std::string command = "python3 external/finite-automata-partition-refinement/partition_refinement.py --prune --compact " + arg.input;
 		std::cout << "Executing: " << command << std::endl;
 		std::system(command.c_str());
-	}
+	}*/
+
+	std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
 	
 	if(arg.algo == 0)
 	{
@@ -143,6 +146,9 @@ int main(int argc, char** argv)
 		// compute LCP using interval stabbing data structure
 		compute_LCP_interval_stabbing(sds,arg.check,arg.print,arg.verb);
 	}
+
+	std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+	if(arg.verb) std::cout << "Elapsed time = " << float(std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count())/1000 << "[s]" << std::endl;
 
 	return 0;
 }
